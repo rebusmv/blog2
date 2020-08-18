@@ -20,6 +20,7 @@ namespace Blog.Controllers
             return View();
         }
 
+        [HttpGet]
         public IActionResult Edit()
         {
             return View();
