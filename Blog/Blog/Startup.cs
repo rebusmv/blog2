@@ -15,6 +15,7 @@ namespace Blog
        
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMvc();
         }
 
       
@@ -25,14 +26,13 @@ namespace Blog
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("/", async context =>
-                {
-                    await context.Response.WriteAsync("Hello World!");
-                });
+                endpoints.MapDefaultControllerRoute();
             });
         }
     }
