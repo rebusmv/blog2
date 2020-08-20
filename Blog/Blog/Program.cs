@@ -17,30 +17,41 @@ namespace Blog
         public static void Main(string[] args)
         {
             var host = CreateHostBuilder(args).Build();
-
-            var scope = host.Services.CreateScope();
-
-            var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-            var usrMgr = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-            var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-
-            ctx.Database.EnsureCreated();
-
-            var adminRole = new IdentityRole("Admin");
-
-            if (!ctx.Roles.Any())
+            try
             {
-                roleMgr.CreateAsync(adminRole).GetAwaiter().GetResult();
-            }
+                var scope = host.Services.CreateScope();
 
-            if (!ctx.Users.Any(u=>u.UserName == "admin"))
-            {
-                var adminUser = new IdentityUser
+                var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+                var usrMgr = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+                var roleMgr = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+
+                ctx.Database.EnsureCreated();
+
+                var adminRole = new IdentityRole("Admin");
+
+                if (!ctx.Roles.Any())
                 {
-                    UserName = "admin",
-                    Email = "admin@test.com"
-                };
-                usrMgr.CreateAsync(adminUser,"password");
+                    //create a role
+                    roleMgr.CreateAsync(adminRole).GetAwaiter().GetResult();
+                }
+
+                if (!ctx.Users.Any(u => u.UserName == "admin"))
+                {
+                    //create admin
+                    var adminUser = new IdentityUser
+                    {
+                        UserName = "admin",
+                        Email = "admin@test.com"
+                    };
+                    usrMgr.CreateAsync(adminUser, "password").GetAwaiter().GetResult();
+
+                    //add role to user
+                    usrMgr.AddToRoleAsync(adminUser, adminRole.Name).GetAwaiter().GetResult();
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
 
             host.Run();
